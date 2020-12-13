@@ -143,13 +143,13 @@ Overall, the observations from these 6 plots are very informative about some pre
 
 * NHL 2019-2020 Data
 ```{r}
-xfun::embed_file('NHLdata.html')
+xfun::embed_file('NHLdata.txt')
 ```
 
 
 * NFL 2019 Data
 ```{r}
-xfun::embed_file('NFLdata.html')
+xfun::embed_file('NFLdata.txt')
 ```
 
 ### References
