@@ -1,0 +1,463 @@
+---
+title: "STAT 184 - Final Project" 
+subtitle: "Age vs Sports Performance"
+author: "Mitchell Wentzel"
+date: "December 13, 2020"
+output: html_notebook
+---
+
+## Front Matter
+
+### Clean Workspace / Load Packages
+
+```{r}
+# clean up workspace environment
+rm(list = ls())
+
+# all packages used for the assignment
+library(mosaicData)
+library(DataComputing)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+## Introduction to Datasets
+
+## Primary Dataset
+
+### NHL Data (National Hockey League)
+
+To begin the analysis of my primary data set, it needs imported into the workspace. So to do this I had to convert my data file into TXT format and then read it using the read.delim() function. Then I assigned it to the object name of "nhl", since my primary data set is the 2019-2020 NHL player statistic data set. The website link from which the data was collected is in the REFERENCES section of this report.
+
+```{r}
+# Import the NHL Primary data set.
+nhl <- read.delim("NHLdata.txt", header=TRUE)
+```
+
+The following is some general information about my primary data set, taking the 5 Ws into consideration:
+
+* Where: Data found at hockey-reference.com, derived from the National Hockey League 2019-2020 Skater Season Statistics data set.  I say derived because the original data set had almost 30 variables, so I condensed it to the 10 variables that I saw as most beneficial to my research question.
+
+* Who: The statisticians working for the NHL and the website both collect and maintain the data from year to year, as new statistics are taken.
+
+* Why: This data was originally collected because these same statistics are taken over the course of every NHL season and stored in this website database.
+
+* When: My specific data were taken from the 2019-2020 NHL season.
+
+*  What: A case in this data represents an NHL player and their attributes and statistics from the 2019-2020 NHL season.
+
+Next, we can see usage of the str() function, which will give us multiple pieces of key information about the primary data set. 
+
+```{r}
+# Use str() to inspect the NHL data set.
+str(nhl)
+```
+
+From the str() function, we can see that the data set contains 499 obervations of 10 variables, all of the variables in the data set, as well as their class (integer, factor, etc...), and the first 10 or so lines of each variables.
+
+Next, we will utilize the head() function to see the first 5 full observations from the NHL data set. This will allow us to visualize the data in a quick, efficient way before we get into plotting and making more in-depth visualizations that will help us answer our research question.
+
+```{r}
+# Use head() to quickly visualize the NHL data set.
+nhl %>%
+  head(5)
+```
+
+## Secondary Dataset
+
+### NFL Data (National Football League)
+
+To begin the analysis of my secondary data set, it needs imported into the workspace. So to do this I once again had to convert my data file into TXT format and then read it using the read.delim() function. Then I assigned it to the object name of "nfl", since my secondary data set is the 2019 NFL player statistic data set. Again, the link to the website where the data was collected is in the REFERENCES section.
+
+```{r}
+# Import the NFL Secondary data set.
+nfl <- read.delim("NFLdata.txt", header=TRUE)
+```
+
+The following is some general information about my secondary data set, taking the 5 Ws into consideration:
+
+* Where: Data found at pro-football-reference.com, derived from the National Football League 2019 Season Scoring Leaders Statistics data set. I again say derived because the original data set had about 17 varaiables, so I condensed it to the 7 variables that I saw as most benefical to my research question and most relatable to my primary data set.
+
+* Who: The statisticians working for the NFL and the website, who both collect and maintain the data from year to year, as new statistics are taken.
+
+* Why: This data was originally collected because these same statistics are taken over the course of every NFL season and stored in this website database.
+
+* When: My specific data were taken from the 2019 NFL season.
+
+*  What: A case in this data represents an NFL player and their attributes and scoring statistics from the 2019 NFL season.
+
+Next, we can see usage of the str() function, which will give us multiple pieces of key information about the secondary data set. 
+
+```{r}
+# Use str() to inspect the NFL data set.
+str(nfl)
+```
+
+From the str() function, we can see that the data set contains 470 obervations of 7 variables, all of the variables in the data set, as well as their class (integer, factor, num, etc...), and the first 10 or so lines of each variables.
+
+Next, we will utilize the head() function to see the first 5 full observations from the NFL data set. This will again, allow us to visualize the data in a quick, efficient way before we get into plotting and making more in-depth visualizations that will help us answer our research question.
+
+```{r}
+# Use head() to quickly visualize the NFL data set.
+nfl %>%
+  head(5)
+```
+
+## Research Question
+
+How does age affect performance in major league sports careers AND do these findings vary across different major sports leagues?
+
+* The purpose for my analysis is to take player data from two major sports leagues, and try to find common trends within the data that show relationships between the player's age and how well they perform in a given year. 
+
+* Also, I wanted to try and find what age range is typically the most productive for players in the two leagues I look at. 
+
+### Encountered Challenges
+
+The biggest challenge I encountered in this project was actually the data importing and wrangling process. First was finding an accurate data source, and then being able to transform the data into an R readable table. 
+
+* For this, I ended up just taking my data sources and transforming them into TXT files, and then using the read.delim() function to import them into my workspaces.
+
+Also, some of the variables were not similar in my two data files, which needed fixed for any later table joining that needed done in the project.
+
+* For instance, Position was "Position" in NHL and "Pos" in NFL.
+
+* So I had to adjust the name of the Position variable in my NHL data to match the NFL data, so I could join the two tables in my data analysis.
+
+## Exploration of Data
+
+### Data Analysis
+
+To begin my full analysis, I figure it would be best to get my data into "glyph-ready" form first, so I can easily use it in making plots to address my research question later in the report. Also, through this process we can analyze different aspects of the data and see more interesting facts that could help us better address the research question. 
+
+#### Joining Process
+
+First, let's get both data sets ready and able to be joined, because at some point in the analysis, I would like to combine both data sets and show the results on one plot. To do this, I first need to add a new variable to each data set to specify the league they represent, and call that new variable "League". 
+
+So, let's do the NHL (Primary) data set first. We will add a new variable to the data set called "League" and assign the value "NHL" to each case this way. Then I will print the result to make sure the new variable was assigned successfully.
+
+Also in the process of adding the new variable to join on, I would like to sort the data and only utilize the highest scoring positions in the league. This will give us only players that score most often based on position, and the highest scoring player activity will be more easily shown this way in the later plots. The highest scoring positions in the NHL are Centers, Left Wings, Right Wings, and Defensemen. So we will filter by those positions first and then add the new variable using mutate. Also, we will use select here to pull out the most needed variables for this piece of the report.
+
+```{r, warning=FALSE}
+# Begin chain with a new object name, finalNHL, and start with the full nhl data. 
+finalNHL <- nhl %>%
+  
+  # filter by the positions in the description.
+  filter(Pos == c("C", "LW", "RW", "D")) %>%
+  
+  # mutate to add the new variable League.
+  mutate(League = "NHL") %>%
+  
+  # Select the variables we need for the analysis.
+  select("Player", "Age", "Pos", "GP", "PTS", "League")
+
+# Print the results of the new variable.
+finalNHL
+```
+
+Now we will conduct a similar wrangling procedure on the NFL (Secondary) data set. First, we will add a new variable to the data set called "League" and assign the value "NFL" to each case this way. Then I will print the result to make sure the new variable was assigned successfully.
+
+Also in the process of adding the new variable to join on, I would like to sort the data and only utilize the highest scoring positions in the league. This will give us only players that score most often based on position, and the highest scoring player activity will be more easily shown this way in the later plots. The highest scoring positions in the NFL are Quarter Backs, Running Backs, Wide Receivers, and Tight Ends. So we will filter by those positions first and then add the new variable using mutate. Also, we will use select here to pull out the most needed variables for this piece of the report. 
+
+```{r, warning=FALSE}
+# Begin chain with a new object name, finalNFL, and start with the full nfl data. 
+finalNFL <- nfl %>%
+  
+  # filter by the positions in the description.
+  filter(Pos == c("QB", "RB", "WR", "TE")) %>%
+  
+  # mutate to add the new variable League.
+  mutate(League = "NFL") %>%
+  
+  # Select the variables we need for the analysis.
+  select("Player", "Age", "Pos", "G", "Pts", "League")
+
+# Print the results of the new variable.
+finalNFL
+```
+
+Now we can use our two final tables for the NHL and NFL top scoring positions and players, and join them so we can use the joined tables as a plot for later analysis. By joining these tables, we can take the top scoring players, by position, in each league and compare them in the same plot, and by separating them by different colors or aesthetics. 
+
+To do this, I will be using a full join so that we have all players (cases) from both the left and right table in the result. This will allow us to easily visualize the leagues in one plot in the RESEARCH PLOTS section of this report. I will also print the resulting table after to make sure the join process was successful.
+
+```{r, warning = FALSE}
+# Start by assigning the process to a new object, comboLeagues, and starting with the finalNHL data.
+comboLeagues <- finalNHL %>%
+  
+  # Next use full_join to join the finalNFL data, and keep all cases from the left and right tables.
+  full_join(finalNFL, by = c("Player" = "Player", "Age" = "Age", "Pos" = "Pos", "GP" = "G", "PTS" = "Pts", "League" = "League"))
+
+# Print the resulting joined table.
+comboLeagues
+```
+
+Now, we have completed the joining process of the two tables.
+
+### Additional Ideas for Analysis
+
+#### Utilizing Data Spreading / Wide Data
+
+Now we have successfully converted the NHL and NFL data sets, and joined them for the full, combined plot visualization. So, we can move on into a couple more ideas I had for analyzing different aspects or possibly significant factors in determining if age does in-fact affect sports performance at a major league level.
+
+The first additional idea I had for analysis was to see how many players there are in each position, in each data set. For this I thought to use the final data sets I wrangled during the joining process and utilize data spreading. This way I could spread each data set by position and calculate the total number of players in the final data for each position.
+
+```{r}
+# Start by assigning the process to a new object name, wideNHL and start with the finalNHL data from the joining process.
+wideNHL <- finalNHL %>%
+  
+  # Group the data by position.
+  group_by(Pos) %>%
+  
+  # Calculate the total number of players at each top scoring position.
+  summarise(totalPlayers = sum(n())) %>%
+  
+  # spread the data into a wide format to make it easier to read.
+  spread(key = Pos, value = totalPlayers)
+
+# Print the resulting table.
+wideNHL
+```
+
+Now we can do the same data spreading process on the NFL data. For this we will do the same as the NHL data, and use the final data set I wrangled during the joining process and utilize data spreading. This way I can spread the NFL data set by position and calculate the total number of players in the final data for each position.
+
+```{r}
+# Start by assigning the process to a new object name, wideNFL and start with the finalNFL data from the joining process.
+wideNFL <- finalNFL %>%
+  
+  # Group the data by position.
+  group_by(Pos) %>%
+  
+  # Calculate the total number of players at each top scoring position.
+  summarise(totalPlayers = sum(n())) %>%
+  
+  # spread the data into a wide format to make it easier to read.
+  spread(key = Pos, value = totalPlayers)
+
+# Print the resulting table.
+wideNFL
+```
+
+These wide data tables will be very useful for when I later make visualizations that are sorted by Position, so I can know how many observations are in each position for the top scoring players in that league.
+
+#### Utilizing Regular Expressions
+
+The final idea I had for looking for additional information that could relate to how age affects performance in major league sports would be using regular expressions to calculate the mean of total points scored in the approximate "most productive" age ranges in each of the leagues.
+
+To do this, I will need to use the grepl() function within the filter() of each leagues' final data table I constructed during the joining process earlier in this report. Using the regular expression function of grepl(), I will be able to reduce the table to only results of a certain age range. Then use the total points data from each case in the output to calculate the average total points per player across that age range.
+
+For this section, I will be calculating the average total points scored across the approximate "most productive" age range in each league. For this, I will use the approximate age range of 20-29, since I expect the results of the plots in the upcoming section to reflect a similar result for the answer to my research question.
+
+* NHL Average Total Points Scored (in Age Range 20-29)
+
+```{r, message = FALSE, warning = FALSE}
+# Start by assigning the process to a new object name, NHLMPavg, and begin with the finalNHL data set.
+NHLMPavg <- finalNHL %>%
+  
+  # Use filter, accompanied by the grepl function to complete the regular expression that will sort and produce only results in the projected age range.
+  filter(grepl("^[2][0123456789]$", Age, ignore.case = TRUE)) %>%
+  
+  # Use a summarise function to create a new object, NHLAvgTotPtsScored, and assign the calculated avgerage to it.
+  summarise(NHLAvgTotPtsScored = mean(PTS))
+
+# Finally, print the resulting mean.
+NHLMPavg
+```
+
+Based on the results of the code above, we can conclude that the average total points scored by an NHL player in the approximate "most productive" age range of 20-29, is about 16 points.
+
+Now we will conduct a similar analysis on the finalNFL data. For this again, I will need to use the grepl() function within the filter() of the finalNFL data table I constructed during the joining process earlier in the report. Then utilizing the regular expression function, grepl(), I will be able to reduce the table to only results of the age range, 20-29. Then I will use the total points data from each case in the output to calculate the average total points per player across that age range.
+
+* NFL Average Total Points Scored (in Age Range 20-29)
+
+```{r, message = FALSE, warning = FALSE}
+# Start by assigning the process to a new object name, NFLMPavg, and begin with the finalNFL data set.
+NFLMPavg <- finalNFL %>%
+  
+  # Use filter, accompanied by the grepl function to complete the regular expression that will sort and produce only results in the projected age range.
+  filter(grepl("^[2][0123456789]$", Age, ignore.case = TRUE)) %>%
+  
+  # Use a summarise function to create a new object, NHLAvgTotPtsScored, and assign the calculated avgerage to it.
+  summarise(NFLAvgTotPtsScored = mean(Pts))
+
+# Finally, print the resulting mean.
+NFLMPavg
+```
+
+Based on the results of the code above, we can conclude that the average total points scored by an NFL player in the approximate "most productive" age range of 20-29, is about 30 points.
+
+Now that we have completed a thorough and in-depth data analysis of both my Primary (NHL) and Secondary (NFL) data sets, we can proceed into making and analyzing my research plots, to gain formal answers for my research question.
+
+### Research Plots
+
+#### Distribution of Player Ages
+
+The first plot I wanted to make when addressing my research question is just a simple histogram, that shows the distribution of ages across both leagues. To do this, I will use the combined data set I made when joining my two data sets earlier. This will give us a good idea of whether or not the ages of players across both leagues are normally distributed. 
+
+```{r, warning = FALSE, message = FALSE}
+# Start with comboLeagues data set.
+comboLeagues %>%
+  
+  # Initialize the ggplot.
+  ggplot() +
+  
+  # Use the geom_histogram geom to start the histogram and outline the variables to be mapped.
+  geom_histogram(aes(x = Age, color = League, fill = League), alpha = 0.5) +
+  
+  # Finally, add all axis labels and title.
+  ylab("Number of Players") +
+  xlab("Player Age") +
+  ggtitle("Distribution of Player Ages (NHL and NFL)")
+```
+
+Based on the Distribution of Player Ages plot, we can see that there seems to be a normal distribution of player ages across both leagues, so this analysis should not skew because of more data only belonging to certain age groups.
+
+#### NHL: Player Age VS Total Points Scored (by Position)
+
+Next, I want to visualize the finalNHL data, such that we can see the straight relationship between a player's age and their total points scored. So to do this, I will be using the finalNHL data set and geom_point. I will also be adding a color sort and facet sort that both represent player position, to both separate the data, and just give it a little color to make the visual easier to read.
+
+```{r, message = FALSE}
+# Start with finalNHL data set.
+finalNHL %>%
+  
+  # Initialize the ggplot and assign the axis variables.
+  ggplot(aes(x = Age, y = PTS)) +
+  
+  # Sort the data by position using color.
+  aes(color = Pos) +
+  
+  # Add the data observation points to the plot.
+  geom_point() +
+  
+  # Sort the data by position again, but using facets this time.
+  facet_wrap(~Pos, ncol = 2) +
+  
+  # Fianlly, add axis labels and title.
+  xlab("Player Age") +
+  ylab("Total Points Scored") +
+  ggtitle("NHL: Player Age VS Total Points Scored (by Position)")
+```
+
+Based on this plot, we can see that even with a sort on player position, there is clearly a relationship between player age and total points scored. We can see that the approximate "most productive" age range for an NHL player comes between the ages of 22 and 30, no matter the position of the player.
+
+#### NFL: Player Age VS Total Points Scored (by Position)
+
+Continuing with a similar idea, I want to visualize the finalNFL data, such that we can see the straight relationship between a player's age and their total points scored. So to do this, I will be using the finalNFL data set and geom_point. I will also be adding a color sort that will represent a player's position, to give the data some color to be able to differentiate by player position easily. Also, I chose to not include a facet sort in the NFL plot because there are less points so it will be far easier to read with all points in one frame.
+
+```{r, message = FALSE}
+# Start with finalNFL data set.
+finalNFL %>%
+  
+  # Initialize the ggplot and assign the axis variables.
+  ggplot(aes(x = Age, y = Pts)) +
+  
+  # Sort the data by position using color.
+  aes(color = Pos) +
+  
+  # Add the data observation points to the plot.
+  geom_point() +
+  
+  # Fianlly, add axis labels and title.
+  xlab("Player Age") +
+  ylab("Total Points Scored") +
+  ggtitle("NFL: Player Age VS Total Points Scored (by Position)")
+```
+
+Based on this plot, we can see again that even with a sort on player position, there is clearly a relationship between player age and total points scored. We can see that the approximate "most productive" age range for an NFL player comes between the ages of 22 and 28, no matter the position of the player.
+
+#### Overall Player Age VS Total Points Scored (NHL and NFL)
+
+The main graph I will be using in my analysis of age vs sports performance is a geom_point plot, with an accompanying smoother. The points will allow for me to easily differentiate between observations from each league, and then the smoother will allow for me to easily read what age range is the most productive across both leagues as well. 
+
+```{r, message = FALSE}
+# Start with comboLeagues data set.
+comboLeagues %>%
+  
+  # Initialize the ggplot and assign the axis variables.
+  ggplot(aes(x = Age, y = PTS)) +
+  
+  # Add the data observation points to the plot and sort the points by League using color.
+  geom_point(aes(color = League)) +
+  
+  # Add a smoother to the plot.
+  geom_smooth() +
+  
+  # Fianlly, add axis labels and title.
+  xlab("Player Age") +
+  ylab("Total Points Scored") +
+  ggtitle("Overall Player Age VS Total Points Scored (NHL and NFL)")
+```
+
+Based on the plot, we can see that both leagues seem to follow approximately the same "most productive" age range for sports performance, in terms of total points scored. We can see that the smoother also supports that range, as that is where the confidence bands are the tightest, and then they start to widen as the smoother goes towards each end of the plot. 
+
+#### Density of Player Age (by League)
+
+Finally, I will be looking at a density plot that will show the density of player ages across the leagues. This will tell us if most of the players in the NHL and NFL are in or near the most productive age range for top scoring players across both leagues. I will be using a layered density plot to differentiate by league, using color. 
+
+```{r}
+# Start with comboLeagues data set.
+comboLeagues %>%
+  
+  # Initialize the ggplot.
+  ggplot() +
+  
+  # Use geom_density, and assign axis variable, color sort, fill variable, and alpha level.
+  geom_density(aes(x = Age, color = League, fill = League), alpha = 0.5) +
+  
+  # Finally, add axis labels and title.
+  xlab("Player Age") +
+  ylab("Density by Age") +
+  ggtitle("Density of Player Age (by League)")
+```
+
+Based on the plot, we can see that what we were looking for is very true. In the NHL, the majority of the players in the league are between the ages of 20 and 33, and the most productive age range for top scoring performance in the NHL is between 22 and 30.
+
+As for the NFL, we can see that the majority of the players in the league are between the ages of 21 and 32. With that, the most productive age range for top scoring performance in the NFL is between the ages of 22 and 28.
+
+Thus, we can conclude that the top scoring, most productive age range for each league, also lies within the most dense age range for all players in both leagues. 
+
+### Answer to Research Question
+
+Firstly, we see that age does clearly seem to effect how a player performs in major league sports. We also know that these results come from two normally distributed player data sets, based on player age.
+
+The most productive age ranges for each league are as follows:
+
+* NHL Top Performing Age Range: 22-30
+
+* NFL Top Performing Age Range: 22-28
+
+We can also conclude that the most productive, top scoring age ranges in both the NHL and NFL, are contained within the most dense player age ranges for each league, respectively.
+
+I found that the findings do vary slightly across the two leagues, however when taking position into effect, this makes the differences almost unnoticable. Most of the position sorting did not seem to show skewed results towards any one position in the league.
+
+### Final Conclusion
+
+Therefore, based on this data we can conclude that age does effect sports performance in the major leagues, and there are very minimal differences between the two leagues in this comparison. 
+
+## Embedded Access to Data Files
+
+### Primary Data
+
+* NHL 2019-2020 Data
+
+```{r}
+# Embed the Primary NHL data set, txt file.
+xfun::embed_file('NHLdata.txt')
+```
+
+### Secondary Data
+
+* NFL 2019 Data
+
+```{r}
+# Embed the Secondary NFL data set, txt file.
+xfun::embed_file('NFLdata.txt')
+```
+
+## References
+
+* https://www.hockey-reference.com/
+
+* https://www.pro-football-reference.com/
+
+
+

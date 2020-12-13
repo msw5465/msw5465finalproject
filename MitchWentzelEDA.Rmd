@@ -1,0 +1,166 @@
+---
+title: "STAT 184 Final Project" 
+subtitle: "Preliminary EDA"
+author: "Mitchell Wentzel"
+output: html_notebook
+---
+
+## Front Matter
+
+```{r}
+# clean up workspace environment
+rm(list = ls())
+
+# all packages used for the assignment
+library(mosaicData)
+library(DataComputing)
+library(tidyr)
+```
+
+# Preliminary EDA
+
+## Research Question
+
+How does age affect performance in major league sports careers AND do these findings vary across different major sports leagues?
+
+
+## Information on Data Sources
+
+### Primary Data:
+
+```{r}
+nhl = read.delim("NHLdata.txt", header=TRUE)
+summary(nhl)
+```
+
+* Where: Data found at hockey-reference.com, derived from the National Hockey League 2019-2020 Skater Season Statistics data set.  I say derived because the original data set had almost 30 variables, so I condensed it to the 10 variables that I saw as most beneficial to my research question.
+
+* Who: The statisticians working for the NHL and the website both collect and maintain the data from year to year, as new statistics are taken.
+
+* Why: This data was originally collected because these same statistics are taken over the course of every NHL season and stored in this website database.
+
+* When: My specific data were taken from the 2019-2020 NHL season.
+
+*  What: A case in this data represents an NHL player and their attributes and statistics from the 2019-2020 NHL season.
+
+```{r}
+nhl %>%
+  head(5)
+```
+
+* Some of the main variables that I plan to use in my research are AGE (Player Age), POS (Player Position), GP (Games Played), PTS (Points Scored), and TM (Team).
+
+```{r}
+names(nhl)
+```
+
+### Secondary Data:
+
+```{r}
+nfl = read.delim("NFLdata.txt", header=TRUE)
+summary(nfl)
+```
+
+* Where: Data found at pro-football-reference.com, derived from the National Football League 2019 Season Scoring Leaders Statistics data set. I again say derived because the original data set had about 17 varaiables, so I condensed it to the 7 variables that I saw as most benefical to my research question and most relatable to my primary data set.
+
+* Who: The statisticians working for the NFL and the website both collect and maintain the data from year to year, as new statistics are taken.
+
+* Why: This data was originally collected because these same statistics are taken over the course of every NFL season and stored in this website database.
+
+* When: My specific data were taken from the 2019 NFL season.
+
+*  What: A case in this data represents an NFL player and their attributes and scoring statistics from the 2019 NFL season.
+
+```{r}
+nfl %>%
+  head(5)
+```
+
+* Some of the main variables I plan to use in my research are Age (Player Age), Tm (Team), Pos (Player Position), G (Games Played), Pts (Points Scored) and Pts/G (Average Points per game).
+
+```{r}
+names(nfl)
+```
+
+### Explore Intuition
+
+* Relationship between Age and Points Scored in NHL data.
+```{r}
+nhl %>%
+  ggplot(aes(x=Age, y=PTS)) +
+  geom_point()
+```
+
+* Relationship between Age and Points Scored in NFL data.
+```{r}
+nfl %>%
+  ggplot(aes(x=Age, y=Pts)) +
+  geom_point()
+```
+
+* Relationship between Age and Points Scored in NHL data, by Positions.
+```{r}
+nhl %>%
+  ggplot(aes(x=Age, y=PTS)) +
+  geom_point() +
+  facet_wrap(~Pos, ncol = 3)
+```
+
+* Relationship between Age and Points Scored in NFL data, by a few positions.
+```{r}
+nfl %>%
+  filter(Pos == c("QB", "RB", "WR")) %>%
+  ggplot(aes(x=Age, y=Pts)) +
+  geom_point() +
+  facet_wrap(~Pos, ncol = 3)
+```
+
+* Relationship between Age and Games Played in NHL.
+```{r}
+nhl %>%
+  ggplot(aes(x=Age, y=GP)) +
+  geom_point()
+```
+
+* Relationship between Age and Games Played in NFL.
+```{r}
+nfl %>%
+  ggplot(aes(x=Age, y=G)) +
+  geom_point()
+```
+
+Above, I have created 6 basic informative plots that could help me in the start of my research. 
+
+* In the first two plots, we can see that there is some kind of relationship between age and scoring. Even though this is good information, I will want to explore the relationships between age and other variables as well. 
+
+* So to get a sense of some of those plots, I created the middle two plots, which show the same relationship but sorted into the facets of a couple teams and positions. 
+
+* Finally, the last two plots show the relationship between Age and Games Played, to make sure we can see if that is a significant factor as well.
+
+Overall, the observations from these 6 plots are very informative about some preliminary information related to my research question. This is a very good start to analyzing the data further, and diving deeper into my research question.
+
+### Two Data Sources
+
+* NHL 2019-2020 Data
+```{r}
+xfun::embed_file('NHLdata.html')
+```
+
+
+* NFL 2019 Data
+```{r}
+xfun::embed_file('NFLdata.html')
+```
+
+### References
+
+* https://www.hockey-reference.com/
+
+* https://www.pro-football-reference.com/
+
+
+
+
+
+
+

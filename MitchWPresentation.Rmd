@@ -1,0 +1,92 @@
+---
+title: "STAT 184 - Final Project" 
+subtitle: "Age vs Sports Performance"
+author: "Mitchell Wentzel"
+output: html_notebook
+---
+
+### Front Matter
+
+```{r}
+# clean up workspace environment
+rm(list = ls())
+
+# all packages used for the assignment
+library(mosaicData)
+library(DataComputing)
+library(tidyr)
+```
+
+### Import Data
+
+```{r}
+nhl = read.delim("NHLdata.txt", header=TRUE)
+nfl = read.delim("NFLdata.txt", header=TRUE)
+```
+
+## Project Presentation
+
+### Research Question
+
+How does age affect performance in major league sports AND do these findings vary across different major sports leagues?
+
+* The purpose for my analysis is to take player data from two major sports leagues, and try to find common trends within the data that show relationships between the player's age and how well they perform in a given year. 
+
+* Also, I wanted to try and find what age range is typically the most productive for players in the two leagues I look at. 
+
+* I used player data from the 2019 seasons of the NHL (Primary) and NFL (Secondary).
+
+### Challenge Encountered
+
+The biggest challenge I encountered in my project was actually the data wrangling process. First was finding an accurate data source, and then being able to transform the data into an R readable table. 
+
+* For this, I ended up just taking my data sources and transforming them into TXT files, and then using the read.delim() function to import them into my workspaces.
+
+Also, some of the variables were off within my two data files.
+
+* For instance, Position was "Position" in NHL and "Pos" in NFL.
+
+* So I had to adjust the name of the Position variable in my NHL data to match the NFL data, so I could join the two tables in my final project.
+
+## Data Visualization
+
+### NHL Age vs Points
+
+```{r}
+nhl %>%
+  filter(Pos == c("C", "D", "RW", "LW")) %>%
+  ggplot(aes(x=Age, y=PTS)) +
+  geom_point() +
+  facet_wrap(~Pos, ncol = 2) +
+  xlab("Age of Player") +
+  ylab("Total Points") +
+  labs(title = "NHL Player Age vs Total Points (2019)")
+```
+
+### NFL Age vs Points
+
+```{r}
+nfl %>%
+  filter(Pos == c("QB", "RB", "WR")) %>%
+  ggplot(aes(x=Age, y=Pts)) +
+  geom_point(aes(color = Pos)) +
+  labs(title = "NFL Player Age vs Total Points (2019)")
+```
+
+### Key Takeaways
+
+Firstly, we see that age does clearly seem to effect how a player performs in major league sports.
+
+* NHL Top Performing Age Range: 22-30
+
+* NFL Top Performing Age Range: 22-27
+
+The findings do vary slightly across the two leagues, however, taking Position into effect makes the differences almost unnoticable. 
+
+Therefore, based on this data we can conclude that age does effect sports performance in the major leagues, and there are very minimal differences between the two leagues in this comparison. 
+
+
+
+
+
+
